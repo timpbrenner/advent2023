@@ -54,7 +54,6 @@ class Day1
     last_digit_index = -1
     last_digit = ""
 
-    puts line
     NUMS.each do |string_val, int_val|
       indices = line.enum_for(:scan, /#{string_val}/).map { Regexp.last_match.begin(0) }
       next if indices.empty?
@@ -69,8 +68,6 @@ class Day1
         last_digit = int_val
       end
     end
-
-    puts "#{first_digit}#{last_digit}".to_i
 
     "#{first_digit}#{last_digit}".to_i
   end

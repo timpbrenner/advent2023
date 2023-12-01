@@ -1,3 +1,3 @@
 require_relative "day1"
 
-Day1.run
+Object.const_get("Day#{ARGV[0]}").run

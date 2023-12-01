@@ -1,3 +1,3 @@
-require_relative "day1"
+Dir["./days/*.rb"].each {|file| require file } 
 
-Object.const_get("Day#{ARGV[0]}").run
+Object.const_get("Days::Day#{ARGV[0]}").run

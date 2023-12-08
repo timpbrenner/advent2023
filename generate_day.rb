@@ -7,8 +7,8 @@ File.open("days/day#{day}.rb", "w") do |f|
 require './util'
 module Days 
   class Day#{day}
-    def self.run
-      Util.readlines("#{day}").each do |line|
+    def self.run(test)
+      Util.readlines("#{day}\#{test}").each do |line|
       end
     end
 

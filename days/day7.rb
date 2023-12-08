@@ -7,6 +7,8 @@ THREE_OF_A_KIND = 9 * 10**11
 TWO_PAIR = 9 * 10**10
 ONE_PAIR = 9 * 10**9
 
+# 245794069
+
 module Days 
   class Day7
     def self.run(test)
@@ -40,22 +42,22 @@ module Days
       rank_score = base_hand_score(cards)
       c = nil
 
-      if cards.uniq.count == 1
+      if cards.uniq.count == 1 || wild_five?(cards)
         rank_score += FIVE_OF_A_KIND
         c = "5_OF_A_KIND"
-      elsif card_counts.values.any? { |cc| cc == 4 }
+      elsif card_counts.values.any? { |cc| cc == 4 } || wild_four?(cards)
         rank_score += FOUR_OF_A_KIND
         c = "4_OF_A_KIND"
-      elsif card_counts.values.any? { |cc| cc == 3 } && card_counts.values.any? { |cc| cc == 2 }
+      elsif (card_counts.values.any? { |cc| cc == 3 } && card_counts.values.any? { |cc| cc == 2 }) || wild_full?(cards)
         rank_score += FULL_HOUSE
         c = "FULL_HOUSE_"
-      elsif card_counts.values.any? { |cc| cc == 3 }
+      elsif card_counts.values.any? { |cc| cc == 3 } || wild_three?(cards)
         rank_score += THREE_OF_A_KIND
         c = "3_OF_A_KIND"
-      elsif card_counts.values.select { |cc| cc == 2 }.count == 2
+      elsif card_counts.values.select { |cc| cc == 2 }.count == 2 || wild_two_pair?(cards)
         rank_score += TWO_PAIR
         c = "TWO_PAIR___"
-      elsif card_counts.values.any? { |cc| cc == 2 }
+      elsif card_counts.values.any? { |cc| cc == 2 } || wild_pair?(cards)
         rank_score += ONE_PAIR
         c = "ONE_PAIR___"
       end
@@ -63,11 +65,61 @@ module Days
       [rank_score, c]
     end
 
+    def self.wild_five?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      return false if wild_count.zero?
+
+      non_wilds.uniq.count == 1
+    end
+
+    def self.wild_four?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      return false if wild_count.zero?
+
+      card_counts = non_wilds.inject(Hash.new(0)) { |h, e| h[e] += 1 ; h }
+      card_counts.values.any? { |cc| cc == (4 - wild_count) }
+    end
+
+    def self.wild_full?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      return false if wild_count.zero?
+
+      card_counts = non_wilds.inject(Hash.new(0)) { |h, e| h[e] += 1 ; h }
+      wild_count == 1 && card_counts.values == [2,2]
+    end
+
+    def self.wild_three?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      return false if wild_count.zero?
+
+      card_counts = cards.inject(Hash.new(0)) { |h, e| h[e] += 1 ; h }
+      card_counts.values.any? { |cc| cc == (3 - wild_count) }
+    end
+
+    def self.wild_two_pair?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      return false if wild_count.zero?
+
+      card_counts = non_wilds.inject(Hash.new(0)) { |h, e| h[e] += 1 ; h }
+      wild_count == 1 && card_counts.values.any? { |cc| cc == 2 }
+    end
+
+    def self.wild_pair?(cards)
+      non_wilds = cards.reject { |c| c == 'J' }
+      wild_count = cards.count - non_wilds.count
+      !wild_count.zero?
+    end
+
     SCORE_CONVERSIONS = {
       'A' => 14, 
       'K' => 13, 
       'Q' => 12, 
-      'J' => 11, 
+      'J' => 1, 
       'T' => 10, 
       '9' => 9, 
       '8' => 8, 
@@ -98,7 +150,7 @@ module Days
       hands.each_with_index do |h, i|
         rank = i + 1
         hand_score = h[:bid] * rank
-        puts "#{rank.to_s.rjust(4, "0")}: #{h[:raw_hand]}(#{h[:class]})[#{h[:hand_rank_score].to_s.rjust(15, "0")})] - #{h[:bid]}(#{hand_score})"
+        # puts "#{rank.to_s.rjust(4, "0")}: #{h[:raw_hand]}(#{h[:class]})[#{h[:hand_rank_score].to_s.rjust(15, "0")})] - #{h[:bid]}(#{hand_score})"
 
         total_score += hand_score
       end

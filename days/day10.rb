@@ -8,6 +8,9 @@ module Days
     #    __
     #    2
 
+
+    # Count intersections withthe pipe going in the four directions. Odd means insidethe pipe,  even means outside
+
     PIPES = {
       '|' =>  [0,2],
       '-' =>  [1,3],
@@ -34,7 +37,7 @@ module Days
       ].each_with_index do |diffs, dir|
         try_x = start[0] + diffs[0]
         try_y = start[1] + diffs[1]
-        path = []
+        path = [[try_x, try_y]]
 
         loop do 
           next_s = next_step(grid, [try_x, try_y], dir)
@@ -53,13 +56,48 @@ module Days
           end
         end
 
-        puts "NO PATH" if path.nil?
-        puts "PATH(#{(path.count / 2.0).ceil}): #{path.inspect}" unless path.nil?
+        next if path.count == 0
         puts "PATH COUNT(#{(path.count / 2.0).ceil}"
+
+        pipe_grid = get_grid_with_only_pipe(grid, path)
+        pipe_grid.each do |row|
+          puts row.map { |r| r || ' ' }.join('')
+        end
+        puts '-----'
+
+        pipe_grid.each do |row|
+          puts row.map { |r| r.nil? ? 'X' : ' '  }.join('')
+        end
+
+        #inner_count = get_inner_count(pipe_grid)
+
+        return
       end
     end
 
     private
+
+    def self.get_inner_count(grid)
+      (1..grid.count - 2).each do |y|
+        (1..grid[y].count - 2).each do |x|
+          next unless grid[y][x].nil?
+          puts "NIL SQUARE"
+        end
+      end
+    end
+
+    def self.get_grid_with_only_pipe(grid, path)
+      pipe_grid = Array.new(grid.count) { |i| Array.new(grid.first.count) }
+
+      path.each do |cell|
+        x = cell[0]
+        y = cell[1]
+
+        pipe_grid[y][x] = grid[y][x] 
+      end
+
+      pipe_grid
+    end
 
     def self.find_start(grid)
       (0..grid.count - 1).each do |y|

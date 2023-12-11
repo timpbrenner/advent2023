@@ -10,6 +10,7 @@ module Days
 
 
     # Count intersections withthe pipe going in the four directions. Odd means insidethe pipe,  even means outside
+    # 351 is too high
 
     PIPES = {
       '|' =>  [0,2],
@@ -27,7 +28,6 @@ module Days
       end
 
       start = find_start(grid)
-      puts "START:#{start.inspect}"
 
       [
         [0,1],
@@ -44,20 +44,17 @@ module Days
           break if next_s.nil?
           path << next_s
 
-          puts next_s.inspect
+          # puts next_s.inspect
 
           try_x = next_s[0]
           try_y = next_s[1]
           dir = next_s[2]
 
-          if grid[try_y][try_x] == 'S'
-            puts "FOUND PATH"
-            break
-          end
+          break if grid[try_y][try_x] == 'S'
         end
 
         next if path.count == 0
-        puts "PATH COUNT(#{(path.count / 2.0).ceil}"
+        puts "PATH COUNT(#{(path.count / 2.0).ceil})"
 
         pipe_grid = get_grid_with_only_pipe(grid, path)
         pipe_grid.each do |row|
@@ -69,7 +66,8 @@ module Days
           puts row.map { |r| r.nil? ? 'X' : ' '  }.join('')
         end
 
-        #inner_count = get_inner_count(pipe_grid)
+        inner_count = get_inner_count(pipe_grid)
+        puts "Inner Count #{inner_count}"
 
         return
       end
@@ -78,12 +76,25 @@ module Days
     private
 
     def self.get_inner_count(grid)
-      (1..grid.count - 2).each do |y|
-        (1..grid[y].count - 2).each do |x|
+      inner_count = 0
+      inner_grid = Array.new(grid.count) { |i| Array.new(grid.first.count) }
+
+      (0..grid.count - 1).each do |y|
+        intersection_count = 0
+        (0..grid[y].count - 1).each do |x|
+          intersection_count += 1 if ['|', '7', 'F', 'S'].include?(grid[y][x])
           next unless grid[y][x].nil?
-          puts "NIL SQUARE"
+
+          inner_grid[y][x] = 'O' if intersection_count.odd?
+          inner_count += 1 if intersection_count.odd? && intersection_count > 0
         end
       end
+
+      inner_grid.each do |row|
+        puts row.map { |r| r || ' '  }.join('')
+      end
+
+      inner_count
     end
 
     def self.get_grid_with_only_pipe(grid, path)

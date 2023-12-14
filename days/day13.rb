@@ -1,9 +1,7 @@
 require './util'
 module Days 
   class Day13
-    # 38575 is too high
-    37975
-    # 30500 is too low
+    # 33200 is too high
 
     def self.run(test)
       groups = []
@@ -19,6 +17,20 @@ module Days
       end
       groups << current_group.dup
 
+      total = 0
+      groups.each_with_index do |g, i|
+        puts i
+        puts '----------------'
+        g.each {|l| puts l }
+        puts
+        mirrors = get_mirror_with_smudge(g)
+        puts "Mirrors: #{mirrors.inspect}"
+        total += mirrors.first + 1 if mirrors.count > 0 
+        puts
+      end
+
+      puts "Smudge Total: #{total * 100}"
+      return
 
       # mirror_vals = get_mirror_vals(groups[0])
       # puts mirror_vals.inspect
@@ -36,6 +48,63 @@ module Days
       puts "Total: #{total}"
     end
 
+    private
+
+    def self.get_smudge_possible_matches(lines)
+      possible_matches = []
+      (0..lines.count - 2).each do |i|
+        differences = line_difference_count(lines[i], lines[i + 1])
+        puts lines[i]
+        puts lines[i + 1]
+        puts differences
+        next unless differences <= 1
+
+        possible_matches << i
+      end
+
+      possible_matches
+    end
+
+    def self.line_difference_count(line, line_1)
+      line_chars = line.chars
+      line_1_chars = line_1.chars
+
+      differences = 0
+      line_chars.each_with_index do |l, c_i|
+        differences += 1 if l != line_1_chars[c_i]
+      end
+      differences
+    end
+
+    def self.get_mirror_with_smudge(lines)
+      possible_matches = get_smudge_possible_matches(lines)
+      puts possible_matches.inspect
+
+      matches = []
+      possible_matches.each do |test_match|
+        smudge_used = false
+
+        (0..lines.count).each do |compare_count|
+          top_index = test_match - compare_count
+          bottom_index = test_match + 1 + compare_count
+
+          top = lines[top_index]&.strip
+          bottom = lines[bottom_index]&.strip
+
+          differences = line_difference_count(top, bottom)
+          valid_match = differences == 0 || (differences == 1 && !smudge_used)
+          smudge_used = true if differences == 1
+
+          if (top_index <= 0 || bottom_index >= lines.count - 1) && valid_match
+            matches << test_match
+            break
+          end
+
+          break unless valid_match
+        end
+      end
+    end
+
     def self.get_mirror_vals(lines)
       puts "Lines___________"
       lines.each { |l| puts l }
@@ -49,42 +118,10 @@ module Days
       puts
       vert_mirror = get_mirror(vert_lines)
 
-
-
       [
         hor_mirror.nil? ? 0 : hor_mirror + 1, 
         vert_mirror.nil? ? 0 : vert_mirror + 1
       ]
-    end
-
-    private
-
-    def self.get_vert_possible_matches(line)
-      (0..line.length).each do |i|
-        next unless line[i] == line[i + 1]
-      end
-    end
-
-    def self.get_vert_mirror(line, possible_matches)
-      compare_count = 1
-      current_possible_matches = possible_matches.dup
-
-      loop do
-        next_matches = []
-        current_possible_matches.each do |test_match|
-          left_index = test_match - compare_count
-          right_index = test_match + 1 + compare_count
-          next unless line[left_index] == line[right_index]
-
-          next_matches << test_match
-        end
-
-        compare_count += 1
-        current_possible_matches = next_matches.dup
-        break if left_index == 0 or right_index == line.length
-      end
-
-      return current_possible_matches.first
     end
 
     def self.turn_contents(lines)

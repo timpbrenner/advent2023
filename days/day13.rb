@@ -25,11 +25,26 @@ module Days
         puts
         mirrors = get_mirror_with_smudge(g)
         puts "Mirrors: #{mirrors.inspect}"
-        total += mirrors.first + 1 if mirrors.count > 0 
+        if mirrors.count > 0 
+          total += (mirrors.first + 1) * 100
+        end
         puts
+
+        vert_lines = turn_contents(g)
+        vert_lines.each {|l| puts l }
+        puts
+
+
+        vert_mirrors = get_mirror_with_smudge(vert_lines)
+        puts "Mirrors: #{mirrors.inspect}"
+        if vert_mirrors.count > 0 
+          total += vert_mirrors.first + 1 
+        end
+        puts
+
       end
 
-      puts "Smudge Total: #{total * 100}"
+      puts "Smudge Total: #{total}"
       return
 
       # mirror_vals = get_mirror_vals(groups[0])
@@ -96,7 +111,8 @@ module Days
           smudge_used = true if differences == 1
 
           if (top_index <= 0 || bottom_index >= lines.count - 1) && valid_match
-            matches << test_match
+            puts "SMUDGE USED: #{smudge_used}"
+            matches << test_match if smudge_used
             break
           end
 

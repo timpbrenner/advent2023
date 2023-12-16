@@ -2,6 +2,7 @@ require './util'
 module Days 
   class Day13
     # 33200 is too high
+    # 32497
     # 11560 is too low
 
     def self.run(test)
